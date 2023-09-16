@@ -15,6 +15,7 @@ interface StateContainer<LimitState : IState<LimitState>> {
         if (newState == currentState) {
             return
         }
+
         val lastState = currentState
         currentState = newState
         lastState?.exit(this)

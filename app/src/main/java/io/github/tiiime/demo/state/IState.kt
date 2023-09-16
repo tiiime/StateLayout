@@ -18,13 +18,13 @@ interface IState<LIMIT> where LIMIT : IState<LIMIT> {
  * 简化 visibility 状态切换实现
  * 类似，可以实现 shimmer loading 等复杂效果
  */
-open class VisibilityChangeState<T>(@IdRes private val containerId: Int) :
-    IState<T> where T : IState<T> {
-    override fun enter(stateContainer: StateContainer<T>) {
+open class VisibilityChangeState<LimitState>(@IdRes private val containerId: Int) :
+    IState<LimitState> where LimitState : IState<LimitState> {
+    override fun enter(stateContainer: StateContainer<LimitState>) {
         stateContainer.getContainer().findViewById<View>(containerId)?.visibility = View.VISIBLE
     }
 
-    override fun exit(stateContainer: StateContainer<T>) {
+    override fun exit(stateContainer: StateContainer<LimitState>) {
         stateContainer.getContainer().findViewById<View>(containerId)?.visibility = View.GONE
     }
 }

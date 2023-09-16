@@ -16,14 +16,27 @@ interface IState<LIMIT> where LIMIT : IState<LIMIT> {
 }
 ```
 
-State 实现可以使用 stateContainer.getContainer() 获取 ViewGroup。  
+State 实现可以使用 stateContainer.getContainer() 获取 ViewGroup。   
+类似 VisibilityChangeState，去操作 ViewGroup 内容。
+```kotlin
+open class VisibilityChangeState<T>(@IdRes private val containerId: Int) :
+    IState<T> where T : IState<T> {
+    override fun enter(stateContainer: StateContainer<T>) {
+        stateContainer.getContainer().findViewById<View>(containerId)?.visibility = View.VISIBLE
+    }
 
-实现好的 IState 逻辑，可以方便的给其他 StateContainer 复用，参考 [VisibilityChangeState](./app/src/main/java/io/github/tiiime/demo/state/IState.kt) 的使用。
+    override fun exit(stateContainer: StateContainer<T>) {
+        stateContainer.getContainer().findViewById<View>(containerId)?.visibility = View.GONE
+    }
+}
+```
+
+实现好的通用 IState 逻辑，可以方便的给其他 StateContainer 复用，参考 [LoadingState](./app/src/main/java/io/github/tiiime/demo/state/widget/EmptyLayout.kt#L42) 复用 VisibilityChangeState 的方式。
 
 
 ### StateContainer
-容器 Layout 需要实现 StateContainer，里面维护了一个 `currentState`，并提供 `StateContainer#setState` 方法供外部使用。  
-需要注意，实现 `StateContainer<LimitState : IState<LimitState>>` 需要指定 IState，限制自己接收的 IState 范围。避免用户传入预期外 State。
+容器 Layout 需要实现 StateContainer，里面维护了一个 `currentState`，并提供 `StateContainer#setState` 方法供外部使用。      
+需要注意，实现 `StateContainer<LimitState : IState<LimitState>>` 需要指定 IState，限制自己 `setState` 方法接收的 IState 范围。避免用户传入预期外 State。
 
 ```kotlin   
 interface StateContainer<LimitState : IState<LimitState>> {
@@ -31,6 +44,17 @@ interface StateContainer<LimitState : IState<LimitState>> {
     fun setState(newState: LimitState) 
     
     ...
+}
+
+class EmptyLayout : FrameLayout, StateContainer<EmptyLayout.State> {
+    ...
+    
+    // 默认实现
+    // override fun setState(newState: EmptyLayout.State) {
+    //     super.setState(newState)
+    // }
+
+    interface State : IState<State>
 }
 ```
 
