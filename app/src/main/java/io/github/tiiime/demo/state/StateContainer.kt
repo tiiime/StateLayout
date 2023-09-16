@@ -8,10 +8,10 @@ import android.view.ViewGroup
  * StateContainer 的实现，需要指定 IState 范围，限制接受外部设置的 IState
  * 避免传入不支持的 State， 执行与预期的行为
  */
-interface StateContainer<T : IState<T>> {
-    var currentState: T?
+interface StateContainer<LimitState : IState<LimitState>> {
+    var currentState: LimitState?
 
-    fun setState(newState: T) {
+    fun setState(newState: LimitState) {
         if (newState == currentState) {
             return
         }

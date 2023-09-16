@@ -23,12 +23,12 @@ State 实现可以使用 stateContainer.getContainer() 获取 ViewGroup。
 
 ### StateContainer
 容器 Layout 需要实现 StateContainer，里面维护了一个 `currentState`，并提供 `StateContainer#setState` 方法供外部使用。  
-需要注意，实现 StateContainer<LIMIT:IState> 需要指定 IState，限制自己接收的 IState 范围。避免用户传入预期外 State。
+需要注意，实现 `StateContainer<LimitState : IState<LimitState>>` 需要指定 IState，限制自己接收的 IState 范围。避免用户传入预期外 State。
 
 ```kotlin   
-interface StateContainer<T : IState<T>> {
+interface StateContainer<LimitState : IState<LimitState>> {
 
-    fun setState(newState: T) 
+    fun setState(newState: LimitState) 
     
     ...
 }
@@ -45,25 +45,27 @@ class EmptyLayout : FrameLayout, StateContainer<EmptyLayout.State> {
     ...
 
     /**
-        * 所有加入 EmptyLayout 的 state 都要实现这个接口
-        *
-        * 查看实现，可以确认有多少使用 EmptyLayout 的状态
-        */
+    * EmptyLayout.State 首先限制了 EmptyLayout#setState 方法接收的参数类型
+    * 所有加入 EmptyLayout 的 state 都要实现这个接口
+    * 使用方在实现 State 时，就要考虑好如何使用 Layout 
+    *
+    * 查看实现，可以确认有多少使用 EmptyLayout 的状态
+    */
     interface State : IState<State>
 
     /**
-        * 展示 Loading 状态
-        */
+    * 展示 Loading 状态
+    */
     object LoadingState : VisibilityChangeState<State>(R.id.loading), State
 
     /**
-        * 展示空视图
-        */
+    * 展示空视图
+    */
     object EmptyState : VisibilityChangeState<State>(R.id.empty_hint), State
 
     /**
-        * 展示 Error，提供重试回调
-        */
+    * 展示 Error，提供重试回调
+    */
     class ErrorState(private val callback: Callback) :
         VisibilityChangeState<State>(R.id.error_retry), State {
         interface Callback {
@@ -82,4 +84,4 @@ class EmptyLayout : FrameLayout, StateContainer<EmptyLayout.State> {
 
 实现 StateContainer 参考 [EmptyLayout](./app/src/main/java/io/github/tiiime/demo/state/widget/EmptyLayout.kt)。  
 
-使用参考 [MainActivity](./app/src/main/java/io/github/tiiime/demo/MainActivity.kt)
+使用 EmptyLayout 参考 [MainActivity](./app/src/main/java/io/github/tiiime/demo/MainActivity.kt)。
